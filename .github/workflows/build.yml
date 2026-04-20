@@ -22,19 +22,23 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Grant execute permission to gradlew
-        run: chmod +x gradlew
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: '8.2'
 
       - name: Build MkvDrama plugin
-        run: ./gradlew MkvDrama:make
+        run: gradle MkvDrama:make
 
       - name: Build KatMovieHD plugin
-        run: ./gradlew KatMovieHD:make
+        run: gradle KatMovieHD:make
 
       - name: Collect all .cs3 files
         run: |
           mkdir -p builds
           find . -name "*.cs3" -not -path "./builds/*" -exec cp {} builds/ \;
+          echo "Built plugins:"
+          ls -la builds/
 
       - name: Generate plugins.json
         run: |
@@ -47,11 +51,13 @@ jobs:
             NAME="${FILE%.cs3}"
             [ "$FIRST" = true ] && FIRST=false || echo "," >> builds/plugins.json
             if [ "$NAME" = "MkvDrama" ]; then
-              LANG="en"; TYPES='["AsianDrama","Movie"]'
+              LANG="en"
+              TYPES='["AsianDrama","Movie"]'
               DESC="Asian dramas and movies from MkvDrama.net"
               ICON="https://mkvdrama.net/favicon.ico"
             else
-              LANG="hi"; TYPES='["Movie","TvSeries","AsianDrama","Anime"]'
+              LANG="hi"
+              TYPES='["Movie","TvSeries","AsianDrama","Anime"]'
               DESC="Hollywood, K-Drama, Anime, Netflix, Disney+ from KatMovieHD"
               ICON="https://new.katmoviehd.cymru/favicon.ico"
             fi
