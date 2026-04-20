@@ -1,2 +1,3 @@
 #!/usr/bin/env sh
-exec "$(dirname "$0")/gradle/wrapper/gradlew" "$@"
+APP_HOME="$(cd "$(dirname "$0")" && pwd)"
+exec gradle "$@"
