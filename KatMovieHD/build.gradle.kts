@@ -1,4 +1,4 @@
-apply(plugin = "com.lagradost.cloudstream3.gradle")
+version = 1
 
 cloudstream {
     description = "Hollywood, K-Drama, Anime, Netflix, Disney+ from KatMovieHD"
