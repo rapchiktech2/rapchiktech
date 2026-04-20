@@ -20,19 +20,12 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
-        with:
-          gradle-version: '8.2'
-
-      - name: Make gradlew executable
-        run: chmod +x gradlew || true
-
-      - name: Build MkvDrama
-        run: gradle :MkvDrama:make --stacktrace
-
-      - name: Build KatMovieHD
-        run: gradle :KatMovieHD:make --stacktrace
+      - name: Build plugins
+        run: |
+          chmod +x gradlew
+          ./gradlew MkvDrama:make KatMovieHD:make --stacktrace
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
 
       - name: Collect cs3 files
         run: |
@@ -40,41 +33,37 @@ jobs:
           find . -name "*.cs3" -not -path "./builds/*" -exec cp {} builds/ \;
           ls -la builds/
 
-      - name: Generate plugins.json and repo.json
+      - name: Generate repo files
         run: |
           REPO="${{ github.repository }}"
           RAW="https://raw.githubusercontent.com/${REPO}/builds"
-          cat > builds/plugins.json << 'EOF'
-          [
+          echo '[
             {
-              "url": "PLACEHOLDER_MKV",
+              "url": "'${RAW}'/MkvDrama.cs3",
               "name": "MkvDrama",
               "internalName": "MkvDrama",
               "authors": ["rapchiktech"],
               "description": "Asian dramas and movies from MkvDrama.net",
               "language": "en",
-              "tvTypes": ["AsianDrama", "Movie"],
+              "tvTypes": ["AsianDrama","Movie"],
               "version": 1,
               "apiVersion": 2,
               "status": 1
             },
             {
-              "url": "PLACEHOLDER_KAT",
+              "url": "'${RAW}'/KatMovieHD.cs3",
               "name": "KatMovieHD",
               "internalName": "KatMovieHD",
               "authors": ["rapchiktech"],
               "description": "Movies and shows from KatMovieHD",
               "language": "hi",
-              "tvTypes": ["Movie", "TvSeries", "AsianDrama", "Anime"],
+              "tvTypes": ["Movie","TvSeries","AsianDrama","Anime"],
               "version": 1,
               "apiVersion": 2,
               "status": 1
             }
-          ]
-          EOF
-          sed -i "s|PLACEHOLDER_MKV|${RAW}/MkvDrama.cs3|g" builds/plugins.json
-          sed -i "s|PLACEHOLDER_KAT|${RAW}/KatMovieHD.cs3|g" builds/plugins.json
-          echo "{\"name\":\"rapchiktech\",\"description\":\"MkvDrama + KatMovieHD by rapchiktech\",\"manifestVersion\":2,\"pluginLists\":[\"${RAW}/plugins.json\"]}" > builds/repo.json
+          ]' > builds/plugins.json
+          echo '{"name":"rapchiktech","description":"MkvDrama + KatMovieHD by rapchiktech","manifestVersion":2,"pluginLists":["'${RAW}'/plugins.json"]}' > builds/repo.json
 
       - name: Deploy to builds branch
         uses: peaceiris/actions-gh-pages@v3
