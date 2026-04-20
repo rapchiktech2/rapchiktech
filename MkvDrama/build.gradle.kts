@@ -1,4 +1,4 @@
-apply(plugin = "com.lagradost.cloudstream3.gradle")
+version = 1
 
 cloudstream {
     description = "Asian dramas and movies from MkvDrama.net"
